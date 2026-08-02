@@ -1,8 +1,6 @@
 #include "WebPortal.h"
 #include <Preferences.h>
 
-Preferences preferences;
-
 void WebPortal::begin()
 {
     server = new WebServer(80);
@@ -27,6 +25,7 @@ void WebPortal::begin()
     Serial.println("Web portal started.");
 }
 
+
 void WebPortal::update()
 {
     if (server)
@@ -34,6 +33,7 @@ void WebPortal::update()
         server->handleClient();
     }
 }
+
 
 void WebPortal::handleRoot()
 {
@@ -73,6 +73,7 @@ void WebPortal::handleRoot()
     );
 }
 
+
 void WebPortal::handleSave()
 {
     if (!server->hasArg("ssid") ||
@@ -93,6 +94,8 @@ void WebPortal::handleSave()
     Serial.println("Saving WiFi credentials:");
     Serial.println(ssid);
 
+    Preferences preferences;
+
     preferences.begin("wifi", false);
 
     preferences.putString(
@@ -106,11 +109,21 @@ void WebPortal::handleSave()
     );
 
     preferences.end();
+    preferences.begin("wifi", true);
 
+    String testSSID = preferences.getString("ssid", "");
+    String testPassword = preferences.getString("password", "");
+
+    preferences.end();
+
+    Serial.println("Verification read:");
+    Serial.println(testSSID);
+    Serial.println(testPassword);
+    
     server->send(
         200,
         "text/html",
-        "<h2>Saved!</h2><p>You can reboot the device.</p>"
+        "<h2>Saved!</h2><p>Reboot the device.</p>"
     );
 }
 
