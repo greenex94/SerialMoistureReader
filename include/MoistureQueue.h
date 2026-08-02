@@ -11,6 +11,12 @@ public:
 
     bool add(MoistureReading reading);
 
+    bool hasItems();
+
+    bool peek(MoistureReading &reading);
+
+    bool pop();
+
     void printQueue();
 
     String getQueueContents();
@@ -23,4 +29,6 @@ private:
     const char* filename = "/queue.jsonl";
 
     String readingToJson(MoistureReading reading);
+
+    bool jsonToReading(String json, MoistureReading &reading);
 };

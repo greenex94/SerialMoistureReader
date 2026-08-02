@@ -35,6 +35,7 @@ void GACReader::update()
 
         buffer += c;
 
+
         if (buffer.length() > 500)
         {
             Serial.println();
@@ -52,6 +53,7 @@ void GACReader::update()
 
             MoistureReading reading;
 
+
             if (timeManager != nullptr)
             {
                 reading.timestamp = timeManager->getTimestamp();
@@ -61,11 +63,12 @@ void GACReader::update()
                 reading.timestamp = "NO_TIME";
             }
 
+
             if (parser.parse(buffer, reading))
             {
                 Serial.println();
                 Serial.println("Parsed Reading:");
-                
+
                 Serial.print("Timestamp: ");
                 Serial.println(reading.timestamp);
 
@@ -81,21 +84,35 @@ void GACReader::update()
                 Serial.print("Temperature: ");
                 Serial.println(reading.temperature);
 
-                if (moistureQueue != nullptr)
+
+
+                if (googleSheets != nullptr)
                 {
-                    if (googleSheets != nullptr)
+                    
+                    bool uploaded = googleSheets->upload(reading);
+
+
+                    if (uploaded)
                     {
-                        if (googleSheets->upload(reading))
+                        Serial.println("Uploaded to Google Sheets.");
+                    }
+                    else
+                    {
+                        Serial.println("Google upload failed. Saving locally.");
+
+
+                        if (moistureQueue != nullptr)
                         {
-                            Serial.println("Uploaded to Google Sheets.");
-                        }
-                        else
-                        {
-                            Serial.println("Google upload failed. Saving locally.");
                             moistureQueue->add(reading);
                         }
                     }
-                    else
+                }
+                else
+                {
+                    Serial.println("Google Sheets unavailable. Saving locally.");
+
+
+                    if (moistureQueue != nullptr)
                     {
                         moistureQueue->add(reading);
                     }

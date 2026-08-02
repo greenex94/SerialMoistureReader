@@ -15,6 +15,9 @@ GACReader gacReader;
 GoogleSheets googleSheets;
 GACSimulator gacSimulator;
 MoistureQueue moistureQueue;
+unsigned long lastQueueCheck = 0;
+
+const unsigned long QUEUE_CHECK_INTERVAL = 1000;
 
 void setup()
 {
@@ -49,12 +52,71 @@ void setup()
     );
 
 
-    gacSimulator.begin();
     googleSheets.begin();
+    gacSimulator.begin();
+    
 
     moistureQueue.printQueue();
 }
 
+void processQueue()
+{
+    if (!moistureQueue.hasItems())
+    {
+        return;
+    }
+
+
+    Serial.println("Processing queued samples...");
+
+
+    int uploadedCount = 0;
+
+
+    while (moistureQueue.hasItems())
+    {
+        MoistureReading reading;
+
+
+        if (!moistureQueue.peek(reading))
+        {
+            break;
+        }
+
+
+        Serial.println("Uploading queued sample:");
+        Serial.println(reading.timestamp);
+
+
+        bool uploaded = googleSheets.upload(reading);
+
+
+        if (uploaded)
+        {
+            moistureQueue.pop();
+
+            uploadedCount++;
+
+            Serial.println("Queued sample removed.");
+        }
+        else
+        {
+            Serial.println("Upload failed. Leaving queue intact.");
+
+            break;
+        }
+
+
+        delay(250);
+    }
+
+
+    if (uploadedCount > 0)
+    {
+        Serial.print("Uploaded queued samples: ");
+        Serial.println(uploadedCount);
+    }
+}
 
 void loop()
 {
@@ -63,5 +125,15 @@ void loop()
     portal.update();
 
     gacReader.update();
+
     gacSimulator.update();
+
+
+
+    if (millis() - lastQueueCheck > QUEUE_CHECK_INTERVAL)
+    {
+        lastQueueCheck = millis();
+
+        processQueue();
+    }
 }
