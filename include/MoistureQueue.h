@@ -22,6 +22,14 @@ public:
     String getQueueContents();
 
     int getQueueCount();
+    
+    String getLastReceived();
+
+    String getLastUpload();
+
+    void setLastReceived(String timestamp);
+
+    void setLastUpload(String timestamp);
 
 
 private:
@@ -31,4 +39,8 @@ private:
     String readingToJson(MoistureReading reading);
 
     bool jsonToReading(String json, MoistureReading &reading);
+
+    String lastReceived = "Never";
+    
+    String lastUpload = "Never";
 };

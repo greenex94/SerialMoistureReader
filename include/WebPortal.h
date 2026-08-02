@@ -14,12 +14,22 @@ public:
 
     void update();
 
+    void setLastReceived(String timestamp);
+
+    void setLastUpload(String timestamp);
+
 
 private:
 
     WebServer* server = nullptr;
 
     MoistureQueue* moistureQueue = nullptr;
+
+
+    String lastReceived = "None";
+
+    String lastUpload = "None";
+
 
     void handleRoot();
 };

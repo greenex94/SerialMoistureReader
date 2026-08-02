@@ -4,6 +4,7 @@
 HardwareSerial GACSerial(2);
 
 
+
 void GACReader::begin(
     TimeManager* tm,
     MoistureQueue* queue,
@@ -14,7 +15,9 @@ void GACReader::begin(
     moistureQueue = queue;
     googleSheets = sheets;
 
+
     Serial.println("Starting GAC Reader...");
+
 
     GACSerial.begin(
         1200,
@@ -23,6 +26,7 @@ void GACReader::begin(
         17
     );
 }
+
 
 
 void GACReader::update()
@@ -40,8 +44,10 @@ void GACReader::update()
         {
             Serial.println();
             Serial.println("BUFFER OVERFLOW - RESETTING");
+
             buffer = "";
         }
+
 
 
         // Detect end of GAC ticket
@@ -54,6 +60,7 @@ void GACReader::update()
             MoistureReading reading;
 
 
+
             if (timeManager != nullptr)
             {
                 reading.timestamp = timeManager->getTimestamp();
@@ -62,6 +69,7 @@ void GACReader::update()
             {
                 reading.timestamp = "NO_TIME";
             }
+
 
 
             if (parser.parse(buffer, reading))
@@ -86,19 +94,41 @@ void GACReader::update()
 
 
 
+                // Update last received timestamp
+                if (moistureQueue != nullptr)
+                {
+                    moistureQueue->setLastReceived(
+                        reading.timestamp
+                    );
+                }
+
+
+
+                // Try immediate Google upload
                 if (googleSheets != nullptr)
                 {
-                    
                     bool uploaded = googleSheets->upload(reading);
 
 
                     if (uploaded)
                     {
-                        Serial.println("Uploaded to Google Sheets.");
+                        Serial.println(
+                            "Uploaded to Google Sheets."
+                        );
+
+
+                        if (moistureQueue != nullptr)
+                        {
+                            moistureQueue->setLastUpload(
+                                reading.timestamp
+                            );
+                        }
                     }
                     else
                     {
-                        Serial.println("Google upload failed. Saving locally.");
+                        Serial.println(
+                            "Google upload failed. Saving locally."
+                        );
 
 
                         if (moistureQueue != nullptr)
@@ -109,7 +139,9 @@ void GACReader::update()
                 }
                 else
                 {
-                    Serial.println("Google Sheets unavailable. Saving locally.");
+                    Serial.println(
+                        "Google Sheets unavailable. Saving locally."
+                    );
 
 
                     if (moistureQueue != nullptr)
@@ -118,6 +150,7 @@ void GACReader::update()
                     }
                 }
             }
+
 
 
             // Clear for next ticket

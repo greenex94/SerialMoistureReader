@@ -373,3 +373,26 @@ int MoistureQueue::getQueueCount()
 
     return count;
 }
+
+String MoistureQueue::getLastReceived()
+{
+    return lastReceived;
+}
+
+
+String MoistureQueue::getLastUpload()
+{
+    return lastUpload;
+}
+
+
+void MoistureQueue::setLastReceived(String timestamp)
+{
+    lastReceived = timestamp;
+}
+
+
+void MoistureQueue::setLastUpload(String timestamp)
+{
+    lastUpload = timestamp;
+}
