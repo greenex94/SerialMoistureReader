@@ -4,12 +4,17 @@
 #include "GACReader.h"
 #include "GACSimulator.h"
 #include "TimeManager.h"
+#include "MoistureQueue.h"
+#include <ESPmDNS.h>
+#include "GoogleSheets.h"
 
 TimeManager timeManager;
 WiFiManager wifi;
 WebPortal portal;
 GACReader gacReader;
+GoogleSheets googleSheets;
 GACSimulator gacSimulator;
+MoistureQueue moistureQueue;
 
 void setup()
 {
@@ -26,14 +31,28 @@ void setup()
     wifi.begin();
 
 
-    if (!wifi.isConnected())
-    {
-        portal.begin();
-    }
-
-    gacReader.begin(&timeManager);
-    gacSimulator.begin();
     timeManager.begin();
+
+
+    moistureQueue.begin();
+
+
+    portal.begin(
+        &moistureQueue
+    );
+
+
+    gacReader.begin(
+        &timeManager,
+        &moistureQueue,
+        &googleSheets
+    );
+
+
+    gacSimulator.begin();
+    googleSheets.begin();
+
+    moistureQueue.printQueue();
 }
 
 

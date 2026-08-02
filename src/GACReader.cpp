@@ -1,17 +1,21 @@
 #include "GACReader.h"
+#include "GoogleSheets.h"
 
 HardwareSerial GACSerial(2);
 
 
-void GACReader::begin(TimeManager* tm)
+void GACReader::begin(
+    TimeManager* tm,
+    MoistureQueue* queue,
+    GoogleSheets* sheets
+)
 {
     timeManager = tm;
-    
+    moistureQueue = queue;
+    googleSheets = sheets;
+
     Serial.println("Starting GAC Reader...");
 
-    // UART2
-    // RX = GPIO16
-    // TX = GPIO17
     GACSerial.begin(
         1200,
         SERIAL_8N1,
@@ -76,6 +80,26 @@ void GACReader::update()
 
                 Serial.print("Temperature: ");
                 Serial.println(reading.temperature);
+
+                if (moistureQueue != nullptr)
+                {
+                    if (googleSheets != nullptr)
+                    {
+                        if (googleSheets->upload(reading))
+                        {
+                            Serial.println("Uploaded to Google Sheets.");
+                        }
+                        else
+                        {
+                            Serial.println("Google upload failed. Saving locally.");
+                            moistureQueue->add(reading);
+                        }
+                    }
+                    else
+                    {
+                        moistureQueue->add(reading);
+                    }
+                }
             }
 
 

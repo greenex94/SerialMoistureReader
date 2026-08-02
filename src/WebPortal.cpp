@@ -1,127 +1,91 @@
 #include "WebPortal.h"
-#include <Preferences.h>
+#include <ESPmDNS.h>
 
-void WebPortal::begin()
+
+void WebPortal::begin(MoistureQueue* queue)
 {
+    moistureQueue = queue;
+
+
+    if (MDNS.begin("moisture"))
+    {
+        Serial.println("mDNS started.");
+        Serial.println("Address: http://moisture.local");
+    }
+    else
+    {
+        Serial.println("mDNS failed.");
+    }
+
+
     server = new WebServer(80);
 
-    server->on("/", [this]()
+
+    server->on("/", HTTP_GET, [this]()
     {
         handleRoot();
     });
 
-    server->on("/save", HTTP_POST, [this]()
-    {
-        handleSave();
-    });
-
-    server->onNotFound([this]()
-    {
-        handleNotFound();
-    });
 
     server->begin();
+
 
     Serial.println("Web portal started.");
 }
 
 
+
 void WebPortal::update()
 {
-    if (server)
+    if (server != nullptr)
     {
         server->handleClient();
     }
 }
 
 
+
 void WebPortal::handleRoot()
 {
-    String html = R"rawliteral(
-<!DOCTYPE html>
-<html>
-
-<head>
-<title>Serial Moisture Reader Setup</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-
-<body>
-
-<h2>Serial Moisture Reader Setup</h2>
-
-<form method="POST" action="/save">
-
-<label>WiFi SSID</label><br>
-<input type="text" name="ssid"><br><br>
-
-<label>Password</label><br>
-<input type="password" name="password"><br><br>
-
-<input type="submit" value="Save">
-
-</form>
-
-</body>
-</html>
-)rawliteral";
-
-    server->send(
-        200,
-        "text/html",
-        html
-    );
-}
+    String page;
 
 
-void WebPortal::handleSave()
-{
-    if (!server->hasArg("ssid") ||
-        !server->hasArg("password"))
+    page += "<html>";
+    page += "<head>";
+    page += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+    page += "<title>Serial Moisture Reader</title>";
+    page += "</head>";
+
+    page += "<body>";
+
+    page += "<h1>Serial Moisture Reader</h1>";
+
+    page += "<h2>Queue</h2>";
+
+
+    if (moistureQueue != nullptr)
     {
-        server->send(
-            400,
-            "text/plain",
-            "Missing fields"
-        );
+        page += "<p>Pending samples: ";
+        page += String(moistureQueue->getQueueCount());
+        page += "</p>";
 
-        return;
+        page += "<hr>";
+
+        page += moistureQueue->getQueueContents();
+    }
+    else
+    {
+        page += "Queue unavailable";
     }
 
-    String ssid = server->arg("ssid");
-    String password = server->arg("password");
 
-    Serial.println("Saving WiFi credentials:");
-    Serial.println(ssid);
+    page += "</body>";
+    page += "</html>";
 
-    Preferences preferences;
 
-    preferences.begin("wifi", false);
-
-    preferences.putString(
-        "ssid",
-        ssid
-    );
-
-    preferences.putString(
-        "password",
-        password
-    );
-
-    preferences.end();
-        
     server->send(
         200,
         "text/html",
-        "<h2>Saved!</h2><p>Reboot the device.</p>"
-    );
-}
-
-void WebPortal::handleNotFound()
-{
-    server->send(
-        404,
-        "text/plain",
-        "Not found"
+        page
     );
 }

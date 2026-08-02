@@ -9,5 +9,5 @@ public:
     bool parse(String ticket, MoistureReading &reading);
 
 private:
-    float extractNumber(String text);
+    float extractNumber(String line);
 };

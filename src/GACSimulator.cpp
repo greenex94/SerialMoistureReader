@@ -20,7 +20,7 @@ void GACSimulator::begin()
 
 void GACSimulator::update()
 {
-    if (millis() - lastSend > 10000)
+    if (millis() - lastSend > 30000)
     {
         lastSend = millis();
 
