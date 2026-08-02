@@ -16,6 +16,7 @@ private:
     void loadCredentials();
     bool connectToWiFi();
     void startAccessPoint();
+    bool setupButtonPressed();
 
     Preferences preferences;
 

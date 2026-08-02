@@ -109,17 +109,7 @@ void WebPortal::handleSave()
     );
 
     preferences.end();
-    preferences.begin("wifi", true);
-
-    String testSSID = preferences.getString("ssid", "");
-    String testPassword = preferences.getString("password", "");
-
-    preferences.end();
-
-    Serial.println("Verification read:");
-    Serial.println(testSSID);
-    Serial.println(testPassword);
-    
+        
     server->send(
         200,
         "text/html",

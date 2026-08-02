@@ -3,6 +3,12 @@
 
 void WiFiManager::begin()
 {
+    if (setupButtonPressed())
+    {
+        startAccessPoint();
+        return;
+    }
+
     loadCredentials();
 
     if (ssid.length() > 0)
@@ -44,11 +50,6 @@ void WiFiManager::loadCredentials()
     Serial.print("SSID length: ");
     Serial.println(ssid.length());
 
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-
-    Serial.print("Password length: ");
-    Serial.println(password.length());
 }
 
 
@@ -131,4 +132,26 @@ void WiFiManager::startAccessPoint()
     {
         Serial.println("Failed to start Access Point!");
     }
+}
+
+bool WiFiManager::setupButtonPressed()
+{
+    pinMode(0, INPUT_PULLUP);
+
+    Serial.println("Checking setup button...");
+
+    unsigned long start = millis();
+
+    while (millis() - start < 3000)
+    {
+        if (digitalRead(0) == LOW)
+        {
+            Serial.println("Setup button pressed.");
+            return true;
+        }
+
+        delay(50);
+    }
+
+    return false;
 }
