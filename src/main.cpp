@@ -1,11 +1,13 @@
 #include <Arduino.h>
-
 #include "WiFiManager.h"
 #include "WebPortal.h"
+#include "GACReader.h"
+#include "GACSimulator.h"
 
 WiFiManager wifi;
 WebPortal portal;
-
+GACReader gacReader;
+GACSimulator gacSimulator;
 
 void setup()
 {
@@ -26,6 +28,9 @@ void setup()
     {
         portal.begin();
     }
+
+    gacReader.begin();
+    gacSimulator.begin();
 }
 
 
@@ -34,4 +39,7 @@ void loop()
     wifi.update();
 
     portal.update();
+
+    gacReader.update();
+    gacSimulator.update();
 }
