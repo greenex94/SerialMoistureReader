@@ -21,7 +21,7 @@ void WiFiManager::startAccessPoint()
     snprintf(
         ssid,
         sizeof(ssid),
-        "SerialReader-%04X",
+        "SerialMoistureReader-%04X",
         (uint16_t)(chipId & 0xFFFF)
     );
 
