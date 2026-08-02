@@ -3,7 +3,9 @@
 #include "WebPortal.h"
 #include "GACReader.h"
 #include "GACSimulator.h"
+#include "TimeManager.h"
 
+TimeManager timeManager;
 WiFiManager wifi;
 WebPortal portal;
 GACReader gacReader;
@@ -29,8 +31,9 @@ void setup()
         portal.begin();
     }
 
-    gacReader.begin();
+    gacReader.begin(&timeManager);
     gacSimulator.begin();
+    timeManager.begin();
 }
 
 
