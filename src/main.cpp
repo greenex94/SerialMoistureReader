@@ -54,7 +54,7 @@ void setup()
 
 
     googleSheets.begin();
-    gacSimulator.begin();
+    //gacSimulator.begin();
     
 
     moistureQueue.printQueue();
@@ -127,7 +127,7 @@ void loop()
 
     gacReader.update();
 
-    gacSimulator.update();
+    //gacSimulator.update();
 
 
 
